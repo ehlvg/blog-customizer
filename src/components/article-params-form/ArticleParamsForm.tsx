@@ -2,7 +2,7 @@ import { ArrowButton } from 'src/ui/arrow-button';
 import { Button } from 'src/ui/button';
 import { Text } from 'src/ui/text/Text';
 import styles from './ArticleParamsForm.module.scss';
-import { FormEvent, useState, useEffect } from 'react';
+import { FormEvent, useState, useEffect, useRef } from 'react';
 import { Spacing } from '../spacing';
 import { RadioGroup } from 'src/ui/radio-group';
 import { Select } from 'src/ui/select';
@@ -30,6 +30,24 @@ export const ArticleParamsForm = ({
 	onResetArticleState,
 }: ArticleParamsFormProps) => {
 	const [isArrowButtonOpen, setIsArrowButtonOpen] = useState(false);
+	const formRef = useRef<HTMLDivElement>(null);
+
+	useEffect(() => {
+		const handleClickOutside = (event: MouseEvent) => {
+			if (
+				isArrowButtonOpen &&
+				formRef.current &&
+				!formRef.current.contains(event.target as Node)
+			) {
+				setIsArrowButtonOpen(false);
+			}
+		};
+
+		document.addEventListener('mousedown', handleClickOutside);
+		return () => {
+			document.removeEventListener('mousedown', handleClickOutside);
+		};
+	}, [isArrowButtonOpen]);
 
 	const [fontOption, setFontOption] = useState(articleState.fontFamilyOption);
 	const [fontSize, setFontSize] = useState(articleState.fontSizeOption);
@@ -69,7 +87,7 @@ export const ArticleParamsForm = ({
 		onArticleStateChange(newArticleState);
 	};
 	return (
-		<div>
+		<div ref={formRef}>
 			<ArrowButton
 				isOpen={isArrowButtonOpen}
 				onClick={() => setIsArrowButtonOpen(!isArrowButtonOpen)}
